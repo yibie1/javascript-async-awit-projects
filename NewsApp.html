@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon"
+        href="https://st.depositphotos.com/1011646/1255/i/450/depositphotos_12553000-stock-photo-breaking-news-screen.jpg"
+        type="image/x-icon">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Daily-News</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .card {
+            border: none;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+        .image-container {
+            position: relative;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .overlay-text {
+            top: 3;
+            width: 100%;
+            background: rgba(46, 45, 45, 0.5);
+            padding: 8px;
+            color: #fff;
+            text-align: left;
+        }
+
+        .overlay-text .card-title {
+            font-size: 0.9rem;
+            color: #f9b908;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .publish-date {
+            font-size: 0.85rem;
+            color: #ddd;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-text {
+            font-size: 1rem;
+            color: #333;
+            text-align: justify;
+            max-height: 80px;
+            overflow: hidden;
+        }
+
+        .card-text.expand {
+            max-height: none;
+        }
+
+        .btn-primary {
+            background-color: #ffcc00;
+            border-color: #ffcc00;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #ffa500;
+            border-color: #ffa500;
+        }
+
+        h2 {
+            font-weight: bold;
+            color: #222;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        h5.card-title {
+            font-weight: bold;
+            color: #333;
+            margin-top: 0.5rem;
+            border-bottom: 2px solid #ffcc00;
+            padding-bottom: 5px;
+        }
+
+        input.form-control {
+            max-width: 200px;
+            border-radius: 20px;
+            padding: 5px 10px;
+        }
+
+        .no-news {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+        }
+
+        .pagination {
+            justify-content: center;
+        }
+
+        .no-underline {
+            text-decoration: none;
+        }
+
+        .no-underline:hover {
+            text-decoration: none;
+        }
+
+        .overlay-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            padding: 12px;
+        }
+
+        .overlay-text p {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container my-5">
+        <h2>Daily News</h2>
+        <div class="text-right mb-3">
+            <input type="text" class="form-control d-inline" id="query" onkeydown="getNews()"
+                placeholder="Search news here...">
+        </div>
+        <div id="display" class="row"></div>
+        <nav>
+            <ul class="pagination" id="pagination"></ul>
+        </nav>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const newsPerPage = 9;
+
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60,
+                second: 1,
+            };
+
+            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInUnit);
+                if (interval >= 1) {
+                    return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
+                }
+            }
+            return "Just now";
+        }
+
+        async function getNews() {
+            var query = document.getElementById('query').value;
+            const API_KEY2 = 'pub_5844956557bfd650d11db5e3567db3623b56f';
+            const url = `https://newsdata.io/api/1/latest?apikey=${API_KEY2}&language=en&q=${query ? query : 'sport'}`;
+            let response = await fetch(url);
+            let datanews = await response.json();
+            let display = document.getElementById('display');
+            let pagination = document.getElementById('pagination');
+            display.innerHTML = '';
+
+            if (datanews.results && datanews.results.length) {
+                const start = (currentPage - 1) * newsPerPage;
+                const end = start + newsPerPage;
+                const currentNews = datanews.results.slice(start, end);
+
+                currentNews.forEach(newsItem => {
+                    const description = newsItem.description || newsItem.title;
+                    const isLongDescription = description.length > 100;
+
+                    display.innerHTML += `
+                        <div class="col-lg-4 col-md-6 col-12 mb-4">
+                            <div class="card">
+                                <div class="image-container">
+                                    <img src="${newsItem.image_url || 'https://i.sstatic.net/y9DpT.jpg'}" class="card-img" alt="News Image">
+                                    <div class="overlay-text">
+                                        <h5 class="card-title">${newsItem.title}</h5>
+                                        <p class="publish-date">${timeAgo(newsItem.pubDate) || 'N/A'}</p>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text" id="desc-${newsItem.link}">${description.slice(0, 100)}${isLongDescription ? '...' : ''}</p>
+                                    ${isLongDescription ? `<a href="#" class="no-underline" onclick="expandDescription('${newsItem.link}', '${newsItem.description}', this)">Read More</a>` : ''}
+                                    <p class="card-text"><strong>By:</strong> ${newsItem.creator || 'Unknown'}</p>
+                                    <a href="${newsItem.link || '#'}" class="btn btn-primary">Read Full Article</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Pagination
+                const totalPages = Math.ceil(datanews.results.length / newsPerPage);
+                pagination.innerHTML = '';
+                for (let i = 1; i <= totalPages; i++) {
+                    pagination.innerHTML += `
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                        </li>
+                    `;
+                }
+
+            } else {
+                display.innerHTML = '<p class="no-news">No news available at the moment.</p>';
+            }
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            getNews();
+        }
+
+        function expandDescription(uuid, fullDescription, element) {
+            const descriptionElement = document.getElementById(`desc-${uuid}`);
+            if (descriptionElement.classList.contains('expand')) {
+                descriptionElement.textContent = fullDescription.slice(0, 100) + '...';
+                element.textContent = 'Read More';
+                descriptionElement.classList.remove('expand');
+            } else {
+                descriptionElement.textContent = fullDescription;
+                element.textContent = 'See Less';
+                descriptionElement.classList.add('expand');
+            }
+        }
+
+        getNews();
+    </script>
+</body>
+
+</html>

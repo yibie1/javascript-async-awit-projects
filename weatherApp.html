@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="shortcut icon"
+        href="https://img.freepik.com/free-vector/watercolor-weather-effects-collection_23-2149115331.jpg?semt=ais_hybrid"
+        type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+
+<body>
+
+
+
+    <div style="padding: 40px;">
+        <h1>Weather  Forcast Web App</h1>
+
+
+        <div style="align-items: center; padding: 50px; border: 0.9px solid slategray; border-radius: 10px;  align-content: center; justify-content: center;"
+            class="fa fa-align-justify" aria-hidden="true">
+            <div>
+                <label for="city">Choose a city:</label>
+                <select id="city" name="city" class="form-control" required>
+                    <option value="Tilili">Tilili</option>
+                    <option value="Bahir Dar">Bahir Dar</option>
+                    <option value="Addis Ababa">Addis Ababa</option>
+                    <option value="Dire Dawa">Dire Dawa</option>
+                    <option value="Harar">Harar</option>
+                    <option value="Gonder">Gonder</option>
+                    <option value="Finote Selam">Finote Selam</option>
+                    <option value="Debre Zeyit">Debre Zeyit</option>
+                    <option value="Debre Birhan">Debre Birhan</option>
+                </select>
+
+            </div>
+            <div>
+                <label for="satrt">Satrt Date</label>
+                <input type="date" name="start" id="start" class="form-control" required>
+                <small style="padding-left: 5px; color: brown;" id="start_date"></small>
+            </div>
+            <div>
+                <label for="end">End Date</label>
+                <input type="date" name="end" id="end" class="form-control" required>
+                <small style="padding-left: 5px; color: brown;" id="end_date"></small>
+            </div>
+
+            <div style="padding: 30px; ">
+                <button type="button" name="show" id="show" onclick="loadWeather()"
+                    class="btn btn-primary btn-lg btn-block">Show Resalut</button>
+            </div>
+        </div>
+
+    </div>
+
+    </div>
+
+
+    <div style="padding: 40px; align-content: center;align-items: center; justify-content: center;" id="result"></div>
+
+   
+
+
+
+
+
+
+    <script>
+        function validate(){
+
+                var start_date = document.getElementById('start').value;
+                var end_date = document.getElementById('end').value;
+                var start_dateer = document.getElementById('start_date')
+                var end_dateer = document.getElementById('end_date')
+                var is_valis = true;
+
+                if(start_date === '' || start_date === null){
+                    start_dateer.innerHTML = 'Please Select Start Date'
+                    is_valis = false;
+                }
+                if(end_date === '' || end_date === null){
+                    end_dateer.innerHTML = 'Please Select End Date'
+                    is_valis= false
+                }
+
+                return is_valis;
+
+        }
+
+
+        const API_KEY = 'U26UTSDGV8BPMMHFD275UMN98';
+
+        async function loadWeather() {
+
+            if(!validate()) return false;
+            try {
+
+                var city = document.getElementById('city').value;
+                var start_date = document.getElementById('start').value;
+                var end_date = document.getElementById('end').value;
+
+
+
+                let response = await fetch(`https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${city}/${start_date}/${end_date}?key=${API_KEY}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                let data = await response.json();
+                console.log(data.days.length);
+
+                document.getElementById('result').innerHTML = `
+                <table class="table table-striped  table-responsive">
+                        <h2> Weather Conditon of ${data.address}</h2>
+                <thead class="thead-inverse">
+                    <tr>
+                        <th>Days</th>
+                        <th>Temprature</th>
+                        <th>Condition</th>
+                        <th>Descritpion</th>
+                        
+                    </tr>
+                    </thead>
+                </table>
+                `;
+                   
+                data.days.forEach(element => {
+
+                    var date = new Date(element.datetime);
+                    var dayname = date.toLocaleDateString('en-US', { weekday: 'long' });
+                    document.getElementById('result').querySelector('table').innerHTML += `
+                    <tbody>
+                        <tr>
+                            <td>${dayname}</td>
+                            <td>${((element.temp - 32) * 5/9).toFixed(1)} °C</td>
+                            <td>${element.conditions}</td>
+                            <td>${element.description}</td>
+                        </tr>
+                    </tbody>
+                    `
+                });
+             
+               
+            } catch (error) {
+                console.log('Error:', error);
+                document.getElementById('result').innerHTML = `<p>Error fetching weather data. Please try again.</p>`;
+            }
+        }
+    </script>
+</body>
+
+</html>

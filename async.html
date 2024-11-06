@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Async and awit</title>
+</head>
+
+<body>
+    <!-- async and awit is the way to 
+     write asynchrones code like synchros 
+     - it helps to avoid call back
+     
+     - async function is a function it returns promise 
+     - await keyword can only use inside async function
+     it pause the execution of the function until the promise 
+     is resolved 
+    -->
+<div id="display"></div>
+    <script>
+
+        async function myfun() {
+            return 'Asyc function'
+        }
+
+        myfun().then(console.log)
+
+        async function awaitex() {
+            let promise = new Promise((resolve) => {
+                setTimeout(() => resolve("This is promise example"), 1000)
+            })
+
+            promise = await promise;
+            console.log(promise)
+        }
+
+        awaitex(); // the result display after a seconed 
+
+        var data = {};
+
+        async function featchdata() {
+
+            try {
+                let featch = await fetch('https://jsonplaceholder.typicode.com/posts')
+                data = await featch.json();
+                // console.log(data);
+            } catch (error) {
+                console.log('Error', error);
+            }
+            return data;
+        }
+
+        var displydata = document.getElementById('display');
+
+displydata.innerHTML = `
+        <table border='1'>
+        <thead>
+            <td>body</td>
+            <td>title</td>
+        </thead>
+</table>
+`;
+      featchdata().then((data) =>{
+        
+       data.forEach(element => {
+        displydata.querySelector('table').innerHTML += `
+        
+
+                    <tr>
+                <td>${element.body}</td>
+                <td>${element.title}</td>
+                </tr>
+        `
+        
+       });
+
+        
+
+      })
+
+          
+            
+
+
+    </script>
+    
+    
+</body>
+
+</html>
